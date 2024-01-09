@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iptables Syntax Generator</title>
-    <style>
+    <style id="styleLight" disabled>
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
+            color: #000;
             margin: 0;
             padding: 0;
             display: flex;
@@ -21,41 +22,146 @@
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 800px; /* Adjusted width */
+            width: 800px;
             max-width: 100%;
             box-sizing: border-box;
-            overflow: hidden; /* Hide overflow to prevent background from extending */
+            overflow: hidden;
         }
 
-        #options-container {
-            flex-grow: 1;
-            padding: 20px;
-            box-sizing: border-box;
-            background-color: #fff; /* Background color for the options section */
-        }
-
+        #options-container,
         #output-container {
             flex-grow: 1;
             padding: 20px;
             box-sizing: border-box;
         }
 
-        h1 {
-            text-align: center;
-            color: #333;
+        h1,
+        h2,
+        label,
+        button {
+            color: #000;
         }
 
         label {
             display: block;
             margin-top: 10px;
             margin-bottom: 5px;
-            color: #333;
+            color: #000;
         }
 
         .flex-container {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
+        }
+
+        select,
+        input,
+        textarea {
+            background-color: #fff;
+            color: #000;
+            border: 1px solid #ccc;
+        }
+
+        select,
+        input,
+        button {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        textarea {
+            width: calc(100% - 20px);
+            height: 100px;
+            box-sizing: border-box;
+        }
+
+        #ruleNumberDiv {
+            margin-top: 10px;
+        }
+
+        #ruleNumber {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        #ruleNumberError {
+            color: red;
+            margin-top: 5px;
+        }
+    </style>
+    <style id="styleDark">
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #container {
+            display: flex;
+            background-color: #212121;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            width: 800px;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        #options-container,
+        #output-container {
+            flex-grow: 1;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1,
+        h2,
+        label,
+        button {
+            color: #fff;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        select,
+        input,
+        textarea {
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #555;
         }
 
         select,
@@ -229,6 +335,9 @@
 
         <!-- Generate Button -->
         <button onclick="generateIptablesSyntax()">Generate iptables Syntax</button>
+
+        <!-- Dark Mode Toggle Button -->
+        <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
     </div>
 
     <!-- Output Section -->
@@ -426,6 +535,15 @@
     function isValidProto(proto) {
         return /^(tcp|udp|icmp|ip)$/i.test(proto);
     }
+
+    function toggleDarkMode() {
+        const styleDark = document.getElementById("styleDark");
+        const styleLight = document.getElementById("styleLight");
+        styleDark.disabled = !styleDark.disabled;
+        styleLight.disabled = !styleLight.disabled;
+    }
+    const styleLight = document.getElementById("styleLight");
+    styleLight.disabled = true;
 </script>
 
 </body>
