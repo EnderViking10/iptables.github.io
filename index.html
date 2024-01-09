@@ -52,6 +52,12 @@
             color: #333;
         }
 
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
         select,
         input,
         button {
@@ -59,12 +65,6 @@
             padding: 10px;
             margin-bottom: 10px;
             box-sizing: border-box;
-        }
-
-        .flex-container {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
         }
 
         button {
@@ -83,10 +83,6 @@
             width: calc(100% - 20px);
             height: 100px;
             box-sizing: border-box;
-        }
-
-        #output {
-            margin-top: 20px;
         }
 
         #ruleNumberDiv {
@@ -121,7 +117,7 @@
             </div>
             <div style="flex-grow: 1; margin-left: 5px;">
                 <label for="chain">Chain:</label>
-                <select id="chain">
+                <select id="chain" onchange="toggleDsnatText()">
                     <option value="INPUT">INPUT</option>
                     <option value="OUTPUT">OUTPUT</option>
                     <option value="FORWARD">FORWARD</option>
@@ -131,22 +127,41 @@
             </div>
         </div>
 
-        <!-- Action and Rule Number -->
+        <!-- Add/Delete and Rule Number action-->
         <div class="flex-container">
             <div style="flex-grow: 1; margin-right: 5px;">
-                <label for="action">Action:</label>
-                <select id="action" onchange="toggleRuleNumberVisibility()" class="input-field">
-                    <option value="append">APPEND</option>
-                    <option value="insert">INSERT</option>
-                    <option value="delete">DELETE</option>
+                <label for="adelete">Add/Delete:</label>
+                <select id="adelete" onchange="toggleRuleNumberVisibility()" class="input-field">
+                    <option value="A">APPEND</option>
+                    <option value="I">INSERT</option>
+                    <option value="D">DELETE</option>
                 </select>
             </div>
             <div id="ruleNumberDiv" style="flex-grow: 1; margin-left: 5px; display: none;">
                 <label for="ruleNumber">Rule Number:</label>
-                <div class="flex-container">
-                    <input type="text" id="ruleNumber" placeholder="Enter rule number" class="input-field">
-                </div>
+                <input type="text" id="ruleNumber" placeholder="Enter rule number" class="input-field">
                 <div id="ruleNumberError" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- Action -->
+        <div id="actionDiv" style="padding: 0;">
+            <div style="flex-grow: 1; margin-right: 5px;">
+                <label for="action">Action:</label>
+                <select id="action">
+                    <option value="ACCEPT">ACCEPT</option>
+                    <option value="DROP">DROP</option>
+                    <option value="LOG">LOG</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- DNAT and SNAT -->
+        <div id="dsnatDiv" style="padding: 0;">
+            <div style="flex-grow: 1; margin-right: 5px;">
+                <label id="dsnatLabel" for="dsnat">New Destination:</label>
+                <input type="text" id="dsnat" placeholder="Enter new destination addr">
+                <div id="dsnatError" class="error-message"></div>
             </div>
         </div>
 
@@ -164,8 +179,14 @@
             </div>
         </div>
 
+        <!-- Protocol -->
+        <label for="protocol">Protocol:</label>
+        <input type="text" id="protocol" placeholder="Enter protocol" onchange="togglePortVisibility()">
+        <div id="protocolError" class="error-message"></div>
+
         <!-- Source and Destination Ports -->
-        <div class="flex-container">
+        <div class="flex-container" id="ports"
+             style="display: none; justify-content: space-between; margin-bottom: 10px;">
             <div style="flex-grow: 1; margin-right: 5px;">
                 <label for="sourcePort">Source Port:</label>
                 <input type="text" id="sourcePort" placeholder="Enter source port">
@@ -178,41 +199,33 @@
             </div>
         </div>
 
-        <!-- MAC Addresses -->
-        <div style="display: flex; justify-content: space-between;">
+        <!-- ICMP Type and Reject with ICMP -->
+        <div id="ICMP" style="display: none; justify-content: space-between;">
             <div style="flex-grow: 1; margin-right: 5px;">
-                <label for="sourceMAC">Source MAC Address (optional):</label>
-                <input type="text" id="sourceMAC" placeholder="Enter source MAC address">
+                <label for="icmpType">ICMP Type:</label>
+                <input type="text" id="icmpType" placeholder="Enter ICMP type">
             </div>
             <div style="flex-grow: 1; margin-left: 5px;">
-                <label for="destinationMAC">Destination MAC Address (optional):</label>
-                <input type="text" id="destinationMAC" placeholder="Enter destination MAC address">
+                <label for="rejectWithICMP">Reject with ICMP:</label>
+                <input type="text" id="rejectWithICMP" placeholder="Enter ICMP type">
             </div>
         </div>
 
-        <!-- Protocol -->
-        <label for="protocol">Protocol:</label>
-        <input type="text" id="protocol" placeholder="Enter protocol (e.g., tcp, udp)">
-
         <!-- Interface -->
-        <label for="interface">Interface:</label>
-        <input type="text" id="interface" placeholder="Enter interface name">
+        <div class="flex-container">
+            <div style="flex-grow: 1; margin-right: 5px;">
+                <label for="iinterface">In Interface:</label>
+                <input type="text" id="iinterface" placeholder="Enter input interface">
+            </div>
+            <div style="flex-grow: 1; margin-right: 5px;">
+                <label for="ointerface">Out Interface:</label>
+                <input type="text" id="ointerface" placeholder="Enter output interface">
+            </div>
+        </div>
 
         <!-- State -->
         <label for="state">State:</label>
-        <input type="text" id="state" placeholder="Enter state (e.g., NEW, ESTABLISHED)">
-
-        <!-- ICMP Type and Reject with ICMP -->
-        <div style="display: flex; justify-content: space-between;">
-            <div style="flex-grow: 1; margin-right: 5px;">
-                <label for="icmpType">ICMP Type (for protocol ICMP):</label>
-                <input type="text" id="icmpType" placeholder="Enter ICMP type (e.g., echo-request)">
-            </div>
-            <div style="flex-grow: 1; margin-left: 5px;">
-                <label for="rejectWithICMP">Reject with ICMP (optional):</label>
-                <input type="text" id="rejectWithICMP" placeholder="Enter ICMP type (e.g., host-unreachable)">
-            </div>
-        </div>
+        <input type="text" id="state" placeholder="Enter state">
 
         <!-- Generate Button -->
         <button onclick="generateIptablesSyntax()">Generate iptables Syntax</button>
@@ -226,27 +239,27 @@
 </div>
 
 <script>
+
     // Function to toggle options based on rule type
     function toggleOptions() {
         // Get references to HTML elements
         const ruleType = document.getElementById("ruleType").value;
-        const actionSelect = document.getElementById("action");
+        const adeleteSelect = document.getElementById("adelete");
         const chainSelect = document.getElementById("chain");
         const ruleNumberInput = document.getElementById("ruleNumber");
 
-        // Clear existing options in the "Action" select dropdown
-        actionSelect.innerHTML = '';
+        // Clear existing options in the "adelete" select dropdown
+        adeleteSelect.innerHTML = '';
 
         // Define available actions based on the selected rule type
-        const actions = (ruleType === "firewall")
-            ? ["append", "insert", "delete"]
-            : ["append", "insert", "delete"];
-
-        // Append the default option
-        actionSelect.add(new Option("Select Action", ""));
+        const adeletes = ["APPEND", "INSERT", "DELETE"];
+        const adeletesV = ["A", "I", "D"];
 
         // Populate the "Action" select dropdown with the available actions
-        actions.forEach(action => actionSelect.add(new Option(action.toUpperCase(), action)));
+        //adeletes.forEach(action => adeleteSelect.add(new Option(action, action)));
+        for (let i = 0; i < adeletes.length; i++) {
+            adeleteSelect.add(new Option(adeletes[i], adeletesV[i]));
+        }
 
         // Clear existing options in the "Chain" select dropdown
         chainSelect.innerHTML = '';
@@ -261,21 +274,64 @@
 
         // Show/hide the "Rule Number" input field based on the selected action
         toggleRuleNumberVisibility();
+        toggleActionVisibility();
+        toggleDsnatVisibility();
     }
-
-    // Function to toggle the visibility of the "Rule Number" input field
-    function toggleRuleNumberVisibility() {
-        const actionSelect = document.getElementById("action");
-        const ruleNumberDiv = document.getElementById("ruleNumberDiv");
-
-        // Show/hide the "Rule Number" div based on the selected action
-        ruleNumberDiv.style.display = (actionSelect.value === "insert" || actionSelect.value === "delete") ? "block" : "none";
-    }
-
 
     // Initial call to toggleOptions to set up the initial state
     toggleOptions();
 
+    // Function to toggle the visibility of the "Rule Number" input field
+    function toggleRuleNumberVisibility() {
+        const actionSelect = document.getElementById("adelete");
+        const ruleNumberDiv = document.getElementById("ruleNumberDiv");
+
+        // Show/hide the "Rule Number" div based on the selected action
+        ruleNumberDiv.style.display = (actionSelect.value === "I" || actionSelect.value === "D") ? "block" : "none";
+    }
+
+    // Function to toggle the visibility of the "Source Port" and "Destination Port" input Fields
+    function togglePortVisibility() {
+        const portsField = document.getElementById("ports");
+        const protocolField = document.getElementById("protocol");
+
+        portsField.style.display = /^(tcp|udp)$/i.test(protocolField.value) ? "flex" : "none";
+        toggleICMP();
+    }
+
+    // Function to toggle the visibility of the "action" dropdown
+    function toggleActionVisibility() {
+        const actionDropdown = document.getElementById("actionDiv");
+        const ruleType = document.getElementById("ruleType");
+
+        actionDropdown.style.display = ruleType.value === "firewall" ? "flex" : "none";
+    }
+
+    // Function to toggle the visibility of the "dsnat" field
+    function toggleDsnatVisibility() {
+        const dsnatField = document.getElementById("dsnatDiv");
+        const ruleType = document.getElementById("ruleType");
+
+        dsnatField.style.display = ruleType.value === "nat" ? "flex" : "none";
+    }
+
+    // Function to change "New Destination" to "New Source" in "dsnat" field
+    function toggleDsnatText() {
+        const dsnatField = document.getElementById("dsnat");
+        const dsnatLabel = document.getElementById("dsnatLabel");
+        const chain = document.getElementById("chain");
+
+        dsnatField.placeholder = chain.value === "PREROUTING" ? "Enter new destination addr" : "Enter new source addr";
+        dsnatLabel.innerHTML = chain.value === "PREROUTING" ? "New Destination" : "New Source";
+    }
+
+    // Function to toggle the visibility of the "ICMP" fields
+    function toggleICMP() {
+        const icmpField = document.getElementById("ICMP");
+        const protocolField = document.getElementById("protocol");
+
+        icmpField.style.display = /^(icmp)$/i.test(protocolField.value) ? "flex" : "none";
+    }
 
     // Function to generate iptables syntax
     function generateIptablesSyntax() {
@@ -284,22 +340,26 @@
         document.getElementById("destinationIPError").textContent = "";
         document.getElementById("sourcePortError").textContent = "";
         document.getElementById("destinationPortError").textContent = "";
+        document.getElementById("protocolError").textContent = "";
+        document.getElementById("dsnatError").textContent = "";
 
         // Get values from inputs
         const ruleType = document.getElementById("ruleType").value;
         const chain = document.getElementById("chain").value;
-        const action = document.getElementById("action").value;
+        const adelete = document.getElementById("adelete").value;
+        const ruleNum = document.getElementById("ruleNumber").value;
         const sourceIP = document.getElementById("sourceIP").value;
         const destinationIP = document.getElementById("destinationIP").value;
         const sourcePort = document.getElementById("sourcePort").value;
         const destinationPort = document.getElementById("destinationPort").value;
         const protocol = document.getElementById("protocol").value;
-        const interfaceName = document.getElementById("interface").value;
+        const iInterfaceName = document.getElementById("iinterface").value;
+        const oInterfaceName = document.getElementById("ointerface").value;
         const state = document.getElementById("state").value;
         const icmpType = document.getElementById("icmpType").value;
-        const sourceMAC = document.getElementById("sourceMAC").value;
-        const destinationMAC = document.getElementById("destinationMAC").value;
         const rejectWithICMP = document.getElementById("rejectWithICMP").value;
+        const action = document.getElementById("action").value;
+        const dsnatIp = document.getElementById("dsnat").value;
 
         // Validate inputs
         if (sourceIP && !isValidIP(sourceIP)) {
@@ -322,20 +382,31 @@
             return;
         }
 
+        if (protocol && !isValidProto(protocol)) {
+            document.getElementById("protocolError").textContent = "Invalid Protocol";
+            return;
+        }
+
+        if (dsnatIp && !isValidIP(dsnatIp)) {
+            document.getElementById("dsnatError").textContent = "Invalid IP";
+            return;
+        }
+
         // Constructing iptables syntax
-        const iptablesSyntax = "iptables -" + action + " " + chain + " " +
+        const iptablesSyntax = "iptables -" + adelete + " " + chain + " " +
+            (ruleNum ? `${ruleNum} ` : '') +
             (sourceIP ? `-s ${sourceIP} ` : '') +
             (destinationIP ? `-d ${destinationIP} ` : '') +
             (sourcePort ? `--sport ${sourcePort} ` : '') +
-            (destinationPort ? `--port ${destinationPort} ` : '') +
+            (destinationPort ? `--dport ${destinationPort} ` : '') +
             (protocol ? `-p ${protocol} ` : '') +
-            (interfaceName ? `-i ${interfaceName} ` : '') +
+            (iInterfaceName ? `-i ${iInterfaceName} ` : '') +
+            (oInterfaceName ? `-o ${oInterfaceName} ` : '') +
             (state ? `-m state --state ${state} ` : '') +
             (icmpType && protocol.toLowerCase() === "icmp" ? `--icmp-type ${icmpType} ` : '') +
-            (sourceMAC ? `-m mac --mac-source ${sourceMAC} ` : '') +
-            (destinationMAC ? `-m mac --mac-destination ${destinationMAC} ` : '') +
             (rejectWithICMP ? `-j REJECT --reject-with icmp-${rejectWithICMP} ` : '') +
-            (ruleType === "firewall" ? '-j ACCEPT' : `-j SNAT --to-source ${destinationIP}`);
+            (ruleType === "firewall" ? `-j ${action}` : '') +
+            (ruleType === "nat" ? chain === "PREROUTING" ? `-j DNAT --to-destination ${dsnatIp}` : `-j SNAT --to-source ${dsnatIp}` : '');
 
         // Displaying generated iptables syntax
         document.getElementById("outputTextarea").value = iptablesSyntax;
@@ -350,7 +421,14 @@
     function isValidPort(port) {
         return /^(\d{1,5}|[1-5]\d{4}|6[0-5][0-5][0-3][0-5])$/.test(port);
     }
+
+    // Function to validate Protocol
+    function isValidProto(proto) {
+        return /^(tcp|udp|icmp|ip)$/i.test(proto);
+    }
 </script>
 
 </body>
 </html>
+
+<!-- todo Fix Rule number and add/delete alignment -->
