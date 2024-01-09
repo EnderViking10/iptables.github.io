@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iptables Syntax Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #container {
+            display: flex;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 800px; /* Adjusted width */
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden; /* Hide overflow to prevent background from extending */
+        }
+
+        #options-container {
+            flex-grow: 1;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #fff; /* Background color for the options section */
+        }
+
+        #output-container {
+            flex-grow: 1;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        select,
+        input,
+        button {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        textarea {
+            width: calc(100% - 20px);
+            height: 100px;
+            box-sizing: border-box;
+        }
+
+        #output {
+            margin-top: 20px;
+        }
+
+        #ruleNumberDiv {
+            margin-top: 10px;
+        }
+
+        #ruleNumber {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        #ruleNumberError {
+            color: red;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div id="container">
+    <div id="options-container">
+        <h1>iptables Syntax Generator</h1>
+
+        <!-- Rule Type and Chain -->
+        <div class="flex-container">
+            <div style="flex-grow: 1; margin-right: 5px;">
+                <label for="ruleType">Rule Type:</label>
+                <select id="ruleType" onchange="toggleOptions()">
+                    <option value="firewall">Firewall Rule</option>
+                    <option value="nat">NAT Rule</option>
+                </select>
+            </div>
+            <div style="flex-grow: 1; margin-left: 5px;">
+                <label for="chain">Chain:</label>
+                <select id="chain">
+                    <option value="INPUT">INPUT</option>
+                    <option value="OUTPUT">OUTPUT</option>
+                    <option value="FORWARD">FORWARD</option>
+                    <option value="PREROUTING">PREROUTING</option>
+                    <option value="POSTROUTING">POSTROUTING</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Action and Rule Number -->
+        <div class="flex-container">
+            <div style="flex-grow: 1; margin-right: 5px;">
+                <label for="action">Action:</label>
+                <select id="action" onchange="toggleRuleNumberVisibility()" class="input-field">
+                    <option value="append">APPEND</option>
+                    <option value="insert">INSERT</option>
+                    <option value="delete">DELETE</option>
+                </select>
+            </div>
+            <div id="ruleNumberDiv" style="flex-grow: 1; margin-left: 5px; display: none;">
+                <label for="ruleNumber">Rule Number:</label>
+                <div class="flex-container">
+                    <input type="text" id="ruleNumber" placeholder="Enter rule number" class="input-field">
+                </div>
+                <div id="ruleNumberError" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- Source and Destination IPs -->
+        <div class="flex-container">
+            <div style="flex-grow: 1; margin-right: 5px;">
+                <label for="sourceIP">Source IP:</label>
+                <input type="text" id="sourceIP" placeholder="Enter source IP">
+                <div id="sourceIPError" class="error-message"></div>
+            </div>
+            <div style="flex-grow: 1; margin-left: 5px;">
+                <label for="destinationIP">Destination IP:</label>
+                <input type="text" id="destinationIP" placeholder="Enter destination IP">
+                <div id="destinationIPError" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- Source and Destination Ports -->
+        <div class="flex-container">
+            <div style="flex-grow: 1; margin-right: 5px;">
+                <label for="sourcePort">Source Port:</label>
+                <input type="text" id="sourcePort" placeholder="Enter source port">
+                <div id="sourcePortError" class="error-message"></div>
+            </div>
+            <div style="flex-grow: 1; margin-left: 5px;">
+                <label for="destinationPort">Destination Port:</label>
+                <input type="text" id="destinationPort" placeholder="Enter destination port">
+                <div id="destinationPortError" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- MAC Addresses -->
+        <div style="display: flex; justify-content: space-between;">
+            <div style="flex-grow: 1; margin-right: 5px;">
+                <label for="sourceMAC">Source MAC Address (optional):</label>
+                <input type="text" id="sourceMAC" placeholder="Enter source MAC address">
+            </div>
+            <div style="flex-grow: 1; margin-left: 5px;">
+                <label for="destinationMAC">Destination MAC Address (optional):</label>
+                <input type="text" id="destinationMAC" placeholder="Enter destination MAC address">
+            </div>
+        </div>
+
+        <!-- Protocol -->
+        <label for="protocol">Protocol:</label>
+        <input type="text" id="protocol" placeholder="Enter protocol (e.g., tcp, udp)">
+
+        <!-- Interface -->
+        <label for="interface">Interface:</label>
+        <input type="text" id="interface" placeholder="Enter interface name">
+
+        <!-- State -->
+        <label for="state">State:</label>
+        <input type="text" id="state" placeholder="Enter state (e.g., NEW, ESTABLISHED)">
+
+        <!-- ICMP Type and Reject with ICMP -->
+        <div style="display: flex; justify-content: space-between;">
+            <div style="flex-grow: 1; margin-right: 5px;">
+                <label for="icmpType">ICMP Type (for protocol ICMP):</label>
+                <input type="text" id="icmpType" placeholder="Enter ICMP type (e.g., echo-request)">
+            </div>
+            <div style="flex-grow: 1; margin-left: 5px;">
+                <label for="rejectWithICMP">Reject with ICMP (optional):</label>
+                <input type="text" id="rejectWithICMP" placeholder="Enter ICMP type (e.g., host-unreachable)">
+            </div>
+        </div>
+
+        <!-- Generate Button -->
+        <button onclick="generateIptablesSyntax()">Generate iptables Syntax</button>
+    </div>
+
+    <!-- Output Section -->
+    <div id="output-container">
+        <h2>Generated iptables Syntax:</h2>
+        <textarea id="outputTextarea" readonly></textarea>
+    </div>
+</div>
+
+<script>
+    // Function to toggle options based on rule type
+    function toggleOptions() {
+        // Get references to HTML elements
+        const ruleType = document.getElementById("ruleType").value;
+        const actionSelect = document.getElementById("action");
+        const chainSelect = document.getElementById("chain");
+        const ruleNumberInput = document.getElementById("ruleNumber");
+
+        // Clear existing options in the "Action" select dropdown
+        actionSelect.innerHTML = '';
+
+        // Define available actions based on the selected rule type
+        const actions = (ruleType === "firewall")
+            ? ["append", "insert", "delete"]
+            : ["append", "insert", "delete"];
+
+        // Append the default option
+        actionSelect.add(new Option("Select Action", ""));
+
+        // Populate the "Action" select dropdown with the available actions
+        actions.forEach(action => actionSelect.add(new Option(action.toUpperCase(), action)));
+
+        // Clear existing options in the "Chain" select dropdown
+        chainSelect.innerHTML = '';
+
+        // Define available chains based on the selected rule type
+        const chains = (ruleType === "firewall")
+            ? ["INPUT", "OUTPUT", "FORWARD"]
+            : ["PREROUTING", "POSTROUTING"];
+
+        // Populate the "Chain" select dropdown with the available chains
+        chains.forEach(chain => chainSelect.add(new Option(chain, chain)));
+
+        // Show/hide the "Rule Number" input field based on the selected action
+        toggleRuleNumberVisibility();
+    }
+
+    // Function to toggle the visibility of the "Rule Number" input field
+    function toggleRuleNumberVisibility() {
+        const actionSelect = document.getElementById("action");
+        const ruleNumberDiv = document.getElementById("ruleNumberDiv");
+
+        // Show/hide the "Rule Number" div based on the selected action
+        ruleNumberDiv.style.display = (actionSelect.value === "insert" || actionSelect.value === "delete") ? "block" : "none";
+    }
+
+
+    // Initial call to toggleOptions to set up the initial state
+    toggleOptions();
+
+
+    // Function to generate iptables syntax
+    function generateIptablesSyntax() {
+        // Reset error messages
+        document.getElementById("sourceIPError").textContent = "";
+        document.getElementById("destinationIPError").textContent = "";
+        document.getElementById("sourcePortError").textContent = "";
+        document.getElementById("destinationPortError").textContent = "";
+
+        // Get values from inputs
+        const ruleType = document.getElementById("ruleType").value;
+        const chain = document.getElementById("chain").value;
+        const action = document.getElementById("action").value;
+        const sourceIP = document.getElementById("sourceIP").value;
+        const destinationIP = document.getElementById("destinationIP").value;
+        const sourcePort = document.getElementById("sourcePort").value;
+        const destinationPort = document.getElementById("destinationPort").value;
+        const protocol = document.getElementById("protocol").value;
+        const interfaceName = document.getElementById("interface").value;
+        const state = document.getElementById("state").value;
+        const icmpType = document.getElementById("icmpType").value;
+        const sourceMAC = document.getElementById("sourceMAC").value;
+        const destinationMAC = document.getElementById("destinationMAC").value;
+        const rejectWithICMP = document.getElementById("rejectWithICMP").value;
+
+        // Validate inputs
+        if (sourceIP && !isValidIP(sourceIP)) {
+            document.getElementById("sourceIPError").textContent = "Invalid Source IP Address";
+            return;
+        }
+
+        if (destinationIP && !isValidIP(destinationIP)) {
+            document.getElementById("destinationIPError").textContent = "Invalid Destination IP Address";
+            return;
+        }
+
+        if (sourcePort && !isValidPort(sourcePort)) {
+            document.getElementById("sourcePortError").textContent = "Invalid Source Port";
+            return;
+        }
+
+        if (destinationPort && !isValidPort(destinationPort)) {
+            document.getElementById("destinationPortError").textContent = "Invalid Destination Port";
+            return;
+        }
+
+        // Constructing iptables syntax
+        const iptablesSyntax = "iptables -" + action + " " + chain + " " +
+            (sourceIP ? `-s ${sourceIP} ` : '') +
+            (destinationIP ? `-d ${destinationIP} ` : '') +
+            (sourcePort ? `--sport ${sourcePort} ` : '') +
+            (destinationPort ? `--port ${destinationPort} ` : '') +
+            (protocol ? `-p ${protocol} ` : '') +
+            (interfaceName ? `-i ${interfaceName} ` : '') +
+            (state ? `-m state --state ${state} ` : '') +
+            (icmpType && protocol.toLowerCase() === "icmp" ? `--icmp-type ${icmpType} ` : '') +
+            (sourceMAC ? `-m mac --mac-source ${sourceMAC} ` : '') +
+            (destinationMAC ? `-m mac --mac-destination ${destinationMAC} ` : '') +
+            (rejectWithICMP ? `-j REJECT --reject-with icmp-${rejectWithICMP} ` : '') +
+            (ruleType === "firewall" ? '-j ACCEPT' : `-j SNAT --to-source ${destinationIP}`);
+
+        // Displaying generated iptables syntax
+        document.getElementById("outputTextarea").value = iptablesSyntax;
+    }
+
+    // Function to validate IP address
+    function isValidIP(ip) {
+        return /^(\d{1,3}\.){3}\d{1,3}$/.test(ip);
+    }
+
+    // Function to validate port number
+    function isValidPort(port) {
+        return /^(\d{1,5}|[1-5]\d{4}|6[0-5][0-5][0-3][0-5])$/.test(port);
+    }
+</script>
+
+</body>
+</html>
