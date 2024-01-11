@@ -266,7 +266,7 @@
         <div id="dsnatDiv" style="padding: 0;">
             <div style="flex-grow: 1; margin-right: 5px;">
                 <label id="dsnatLabel" for="dsnat">New Destination:</label>
-                <input type="text" id="dsnat" placeholder="Enter new destination addr">
+                <input type="text" id="dsnat" placeholder="Enter new destination addr" class="input-field">
                 <div id="dsnatError" class="error-message"></div>
             </div>
         </div>
@@ -397,6 +397,7 @@
 
         // Show/hide the "Rule Number" div based on the selected action
         ruleNumberDiv.style.display = (actionSelect.value === "I" || actionSelect.value === "D") ? "block" : "none";
+        document.getElementById("ruleNumber").value = '';
     }
 
     // Function to toggle the visibility of the "Source Port" and "Destination Port" input Fields
@@ -405,6 +406,9 @@
         const protocolField = document.getElementById("protocol");
 
         portsField.style.display = /^(tcp|udp)$/i.test(protocolField.value) ? "flex" : "none";
+        document.getElementById("sourcePort").value = '';
+        document.getElementById("destinationPort").value = '';
+
         toggleICMP();
     }
 
@@ -422,6 +426,8 @@
         const ruleType = document.getElementById("ruleType");
 
         dsnatField.style.display = ruleType.value === "nat" ? "flex" : "none";
+
+        document.getElementById("dsnat").value = '';
     }
 
     // Function to change "New Destination" to "New Source" in "dsnat" field
@@ -432,6 +438,7 @@
 
         dsnatField.placeholder = chain.value === "PREROUTING" ? "Enter new destination addr" : "Enter new source addr";
         dsnatLabel.innerHTML = chain.value === "PREROUTING" ? "New Destination" : "New Source";
+        dsnatField.value = '';
     }
 
     // Function to toggle the visibility of the "ICMP" fields
@@ -440,6 +447,8 @@
         const protocolField = document.getElementById("protocol");
 
         icmpField.style.display = /^(icmp)$/i.test(protocolField.value) ? "flex" : "none";
+        document.getElementById('icmpType').value = '';
+        document.getElementById('rejectWithICMP').value = '';
     }
 
     // Function to generate iptables syntax
@@ -506,16 +515,16 @@
             (ruleNum ? `${ruleNum} ` : '') +
             (sourceIP ? `-s ${sourceIP} ` : '') +
             (destinationIP ? `-d ${destinationIP} ` : '') +
+            (protocol ? `-p ${protocol} ` : '') +
             (sourcePort ? `--sport ${sourcePort} ` : '') +
             (destinationPort ? `--dport ${destinationPort} ` : '') +
-            (protocol ? `-p ${protocol} ` : '') +
             (iInterfaceName ? `-i ${iInterfaceName} ` : '') +
             (oInterfaceName ? `-o ${oInterfaceName} ` : '') +
             (state ? `-m state --state ${state} ` : '') +
             (icmpType && protocol.toLowerCase() === "icmp" ? `--icmp-type ${icmpType} ` : '') +
             (rejectWithICMP ? `-j REJECT --reject-with icmp-${rejectWithICMP} ` : '') +
             (ruleType === "firewall" ? `-j ${action}` : '') +
-            (ruleType === "nat" ? chain === "PREROUTING" ? `-j DNAT --to-destination ${dsnatIp}` : `-j SNAT --to-source ${dsnatIp}` : '');
+            (ruleType === "nat" ? chain === "PREROUTING" ? `-t nat -j DNAT --to-destination ${dsnatIp}` : `-t nat -j SNAT --to-source ${dsnatIp}` : '');
 
         // Displaying generated iptables syntax
         document.getElementById("outputTextarea").value = iptablesSyntax;
