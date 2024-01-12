@@ -1,0 +1,126 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+#container {
+    display: flex;
+    background-color: #212121;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    width: 60%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#options-container {
+    flex-grow: 2;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#output-container {
+    flex-grow: 1;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+h1 {
+    color: #fff;
+    order: -1;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    color: #fff;
+}
+
+.flex-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+select,
+input,
+textarea,
+input[type=number] {
+    color: #fff;
+    background-color: #333;
+    border: 1px solid #555;
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+button {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.error-message {
+    color: red;
+    margin-top: 5px;
+}
+
+#stateDiv {
+    flex-direction: row; /* Keep it as row */
+    align-items: center;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: row; /* Keep it as row */
+    align-items: center;
+}
+
+.checkbox-container {
+    margin-right: 10px; /* Adjust spacing as needed */
+}
+
+.checkbox-label {
+    color: #fff;
+    margin-top: 5px; /* Adjust as needed */
+}
+
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #4caf50;
+    border-radius: 4px;
+    background-color: #333;
+    cursor: pointer;
+    outline: none;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #4caf50;
+    border: 2px solid #4caf50;
+}
+
+.clearButton {
+    width: 120px;
+    font-size: 14px;
+    padding: 8px;
+}
